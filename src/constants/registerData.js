@@ -1,5 +1,6 @@
 export const states = [
-  "Telangana, Andhra Pradesh",
+  "Telangana",
+  "Andhra Pradesh",
   "Karnataka",
   "Tamil Nadu",
   "Maharashtra",

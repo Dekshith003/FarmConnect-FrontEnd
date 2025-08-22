@@ -1,4 +1,4 @@
-import api from "../../services/api";
+import axiosInstance from "../../services/axiosInstance";
 import { apiEndpoints } from "../../utils/Constants";
 
 export const getWeather = (location) => {
@@ -6,7 +6,7 @@ export const getWeather = (location) => {
   if (location && location.lat && location.lon) {
     url += `?lat=${location.lat}&lon=${location.lon}`;
   }
-  return api({
+  return axiosInstance({
     method: "GET",
     url,
   });

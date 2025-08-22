@@ -1,8 +1,9 @@
-import api from "../../services/api";
+import axiosInstance from "../../services/axiosInstance";
 import { apiEndpoints } from "../../utils/Constants";
 
-export const getDashboard = () =>
-  api({
+export function getDashboard() {
+  return axiosInstance({
     method: apiEndpoints.dashboard.getDashboard.method,
     url: apiEndpoints.dashboard.getDashboard.url,
   });
+}

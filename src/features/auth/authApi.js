@@ -1,72 +1,48 @@
-import api from "../../services/api";
+import axiosInstance from "../../services/axiosInstance";
 import { apiEndpoints } from "../../utils/Constants";
 
-// Auth
-export const loginUser = (credentials) =>
-  api({
-    method: apiEndpoints.auth.login.method,
-    url: apiEndpoints.auth.login.url,
-    data: credentials,
+export const registerAPI = (userData) =>
+  axiosInstance.post(apiEndpoints.auth.register.url, userData);
+
+export const loginAPI = (credentials) =>
+  axiosInstance.post(apiEndpoints.auth.login.url, credentials);
+
+export const forgotPasswordAPI = (email) =>
+  axiosInstance.post(apiEndpoints.auth.forgotPassword.url, { email });
+
+export const resetPasswordAPI = ({
+  token,
+  email,
+  newPassword,
+  confirmPassword,
+}) =>
+  axiosInstance.post(apiEndpoints.auth.resetPassword.url, {
+    token,
+    email,
+    newPassword,
+    confirmPassword,
   });
 
-export const registerUser = (userData) =>
-  api({
-    method: apiEndpoints.auth.register.method,
-    url: apiEndpoints.auth.register.url,
-    data: userData,
+export const sendOtpAPI = ({ email }) =>
+  axiosInstance.post(apiEndpoints.auth.emailVerification.url, { email });
+
+export const verifyOtpAPI = ({ email, otp, role }) =>
+  axiosInstance.post(apiEndpoints.auth.verifyRegistration.url, {
+    email,
+    otp,
+    role,
   });
 
-export const verifyRegistrationApi = (data) =>
-  api({
-    method: apiEndpoints.auth.verifyRegistration.method,
-    url: apiEndpoints.auth.verifyRegistration.url,
-    data,
-  });
+export const logoutAPI = () => axiosInstance.post(apiEndpoints.auth.logout.url);
 
-export const forgotPassword = (email, role) =>
-  api({
-    method: apiEndpoints.auth.forgotPassword.method,
-    url: apiEndpoints.auth.forgotPassword.url,
-    data: { email, role },
-  });
+export const getProfileAPI = () =>
+  axiosInstance.get(apiEndpoints.profile.getProfile.url);
 
-export const resetPassword = (data) =>
-  api({
-    method: apiEndpoints.auth.resetPassword.method,
-    url: apiEndpoints.auth.resetPassword.url,
-    data,
-  });
+export const updateProfileAPI = (profileData) =>
+  axiosInstance.put(apiEndpoints.profile.updateProfile.url, profileData);
 
-export const changePassword = (data) =>
-  api({
-    method: apiEndpoints.auth.changePassword.method,
-    url: apiEndpoints.auth.changePassword.url,
-    data,
-  });
-
-export const logoutUser = () =>
-  api({
-    method: apiEndpoints.auth.logout.method,
-    url: apiEndpoints.auth.logout.url,
-  });
-
-export const emailVerification = (data) =>
-  api({
-    method: apiEndpoints.auth.emailVerification.method,
-    url: apiEndpoints.auth.emailVerification.url,
-    data,
-  });
-
-// Profile
-export const getProfile = () =>
-  api({
-    method: apiEndpoints.profile.getProfile.method,
-    url: apiEndpoints.profile.getProfile.url,
-  });
-
-export const updateProfile = (profileData) =>
-  api({
-    method: apiEndpoints.profile.updateProfile.method,
-    url: apiEndpoints.profile.updateProfile.url,
-    data: profileData,
+export const changePasswordAPI = ({ currentPassword, newPassword }) =>
+  axiosInstance.post(apiEndpoints.auth.changePassword.url, {
+    currentPassword,
+    newPassword,
   });

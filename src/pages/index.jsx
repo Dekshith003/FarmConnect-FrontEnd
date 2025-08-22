@@ -199,6 +199,19 @@ function Index() {
         </div>
       </section>
 
+      <section className="bg-[#f5f3ec] py-20">
+        <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-10">
+          <div className="w-full lg:w-1/2" data-aos="fade-right">
+            <img
+              src="https://res.cloudinary.com/di73dum6d/image/upload/v1755849141/MAphoto_wrtbb0.jpg"
+              alt="Modern Farming"
+              className="rounded-xl shadow-lg"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4 text-center">

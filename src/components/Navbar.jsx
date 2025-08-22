@@ -12,25 +12,33 @@ import {
   FaCommentDots,
   FaSearch,
   FaBell,
+  FaLeaf,
+  FaBug,
 } from "react-icons/fa";
 import { Leaf } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { logoutUser } from "../features/auth/authSlice";
+import ProfileAvatar from "./ProfileAvatar";
 
 function ProfileIcon({ profile, user }) {
+  const navigate = useNavigate();
   if (profile?.avatar) {
     return (
       <img
         src={profile.avatar}
         alt="Avatar"
-        className="w-8 h-8 rounded-full object-cover border-2 border-green-600"
+        className="w-8 h-8 rounded-full object-cover border-2 border-green-600 cursor-pointer"
         loading="lazy"
+        onClick={() => navigate("/profile")}
       />
     );
   }
   if (profile?.firstName || user?.firstName) {
     return (
-      <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-bold">
+      <div
+        className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-bold cursor-pointer"
+        onClick={() => navigate("/profile")}
+      >
         {profile?.firstName?.charAt(0) || user?.firstName?.charAt(0) || "U"}
       </div>
     );
@@ -45,10 +53,33 @@ export default function NavBar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile } = useSelector((state) => state.profile);
-  const { user } = useSelector((state) => state.auth);
+  let user = useSelector((state) => state.auth.user);
+  let userRole = user?.role || user?.userrole;
+
+  // Fallback to localStorage if Redux state is empty or role missing
+  if (!user || !userRole) {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        user = JSON.parse(storedUser);
+        userRole = user?.role || user?.userrole;
+      }
+      // If still no role, try to get it from token
+      if (!userRole) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          userRole = payload.role;
+        }
+      }
+    } catch (e) {
+      user = null;
+      userRole = null;
+    }
+  }
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate("/login");
     setMenuOpen(false);
   };
@@ -77,15 +108,48 @@ export default function NavBar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-2 text-gray-800">
-          <Link
-            to={navigationLinks.weatherDashboard.path}
-            className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-          >
-            <FaCloudSun className="text-green-600" />
-            <span className="font-medium">Weather</span>
-          </Link>
-          {/* Show all links before login */}
-          {!user && (
+          {/* Farmer links: only for farmer role */}
+          {userRole === "farmer" && (
+            <>
+              <Link
+                to={navigationLinks.cropManagement?.path || "/crop-management"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaLeaf className="text-green-600" />
+                <span className="font-medium">Crop Management</span>
+              </Link>
+              <Link
+                to={navigationLinks.pestDetection?.path || "/pest-detection"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaBug className="text-green-600" />
+                <span className="font-medium">Pest Detection</span>
+              </Link>
+              <Link
+                to={navigationLinks.weatherDashboard.path}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaCloudSun className="text-green-600" />
+                <span className="font-medium">Weather</span>
+              </Link>
+              <Link
+                to={navigationLinks.map?.path || "/map"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaMapMarkerAlt className="text-green-600" />
+                <span className="font-medium">Farm Map</span>
+              </Link>
+              <Link
+                to={navigationLinks.dashboard?.path || "/dashboard"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaChartLine className="text-green-600" />
+                <span className="font-medium">Dashboard</span>
+              </Link>
+            </>
+          )}
+          {/* Customer links: only for customer role */}
+          {userRole === "customer" && (
             <>
               <Link
                 to={navigationLinks.marketplace.path}
@@ -102,117 +166,75 @@ export default function NavBar() {
                 <span className="font-medium">Farm Map</span>
               </Link>
               <Link
-                to={navigationLinks.messages?.path || "/messages"}
+                to={navigationLinks.dashboard?.path || "/dashboard"}
                 className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
               >
-                <FaCommentDots className="text-green-600" />
-                <span className="font-medium">Messages</span>
+                <FaChartLine className="text-green-600" />
+                <span className="font-medium">Dashboard</span>
+              </Link>
+              <Link
+                to={navigationLinks.weatherDashboard.path}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaCloudSun className="text-green-600" />
+                <span className="font-medium">Weather</span>
               </Link>
             </>
           )}
-          {user && (
+          {/* Admin links */}
+          {user && userRole === "admin" && (
             <>
-              {user.role === "admin" && (
-                <>
-                  <Link
-                    to={navigationLinks.marketplace.path}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaStore className="text-green-600" />
-                    <span className="font-medium">Marketplace</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.dashboard?.path || "/dashboard"}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm hover:bg-gray-100 transition"
-                  >
-                    <FaChartLine className="w-4 h-4" /> Dashboard
-                  </Link>
-                  <Link
-                    to={navigationLinks.weatherDashboard.path}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCloudSun className="text-green-600" />
-                    <span className="font-medium">Weather</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.map?.path || "/map"}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaMapMarkerAlt className="text-green-600" />
-                    <span className="font-medium">Farm Map</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.messages?.path || "/messages"}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCommentDots className="text-green-600" />
-                    <span className="font-medium">Messages</span>
-                  </Link>
-                </>
-              )}
-              {user.role === "farmer" && (
-                <>
-                  <Link
-                    to={navigationLinks.dashboard?.path || "/dashboard"}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-full text-sm hover:bg-gray-100 transition"
-                  >
-                    <FaChartLine className="w-4 h-4" /> Dashboard
-                  </Link>
-                  <Link
-                    to={navigationLinks.map?.path || "/map"}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaMapMarkerAlt className="text-green-600" />
-                    <span className="font-medium">Farm Map</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.weatherDashboard.path}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCloudSun className="text-green-600" />
-                    <span className="font-medium">Weather</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.messages?.path || "/messages"}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCommentDots className="text-green-600" />
-                    <span className="font-medium">Messages</span>
-                  </Link>
-                </>
-              )}
-              {user.role === "customer" && (
-                <>
-                  <Link
-                    to={navigationLinks.marketplace.path}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaStore className="text-green-600" />
-                    <span className="font-medium">Marketplace</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.weatherDashboard.path}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCloudSun className="text-green-600" />
-                    <span className="font-medium">Weather</span>
-                  </Link>
-                  <Link
-                    to={navigationLinks.messages?.path || "/messages"}
-                    className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
-                  >
-                    <FaCommentDots className="text-green-600" />
-                    <span className="font-medium">Messages</span>
-                  </Link>
-                </>
-              )}
+              <Link
+                to={navigationLinks.dashboard?.path || "/dashboard"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaChartLine className="text-green-600" />
+                <span className="font-medium">Dashboard</span>
+              </Link>
+              <Link
+                to={navigationLinks.map?.path || "/map"}
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaMapMarkerAlt className="text-green-600" />
+                <span className="font-medium">Farm Map</span>
+              </Link>
             </>
           )}
-
-          {/* Spacer */}
-          <div className="w-6" />
-
-          {/* Search and Notification */}
+          {/* Common links: only show when user is not logged in and no role detected */}
+          {!user && !userRole && (
+            <>
+              <Link
+                to="/marketplace"
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaStore className="text-green-600" />
+                <span className="font-medium">Marketplace</span>
+              </Link>
+              <Link
+                to="/pest-detection"
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                onClick={() => localStorage.setItem("selectedRole", "farmer")}
+              >
+                <FaBug className="text-green-600" />
+                <span className="font-medium">Pest Detection</span>
+              </Link>
+              <Link
+                to="/weather-dashboard"
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaCloudSun className="text-green-600" />
+                <span className="font-medium">Weather</span>
+              </Link>
+              <Link
+                to="/map"
+                className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+              >
+                <FaMapMarkerAlt className="text-green-600" />
+                <span className="font-medium">Farm Map</span>
+              </Link>
+            </>
+          )}
+          {/* Search, Notification, Profile */}
           <button
             className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
             title="Search"
@@ -225,15 +247,23 @@ export default function NavBar() {
           >
             <FaBell />
           </button>
-
-          {/* Profile/Logout or Login/Get Started */}
-          <Link
-            to={"/profile"}
-            className="ml-2 flex flex-row items-center gap-2"
-          >
-            <ProfileIcon profile={profile} user={user} />
-            <span className="font-medium text-gray-700">Profile</span>
-          </Link>
+          {user ? (
+            <Link
+              to={"/profile"}
+              className="ml-2 flex items-center"
+              title={profile?.firstName || user?.firstName || "Profile"}
+            >
+              <ProfileAvatar profile={profile} size={32} />
+            </Link>
+          ) : (
+            <Link
+              to={"/profile"}
+              className="ml-2 flex flex-row items-center gap-2"
+            >
+              <FaUser className="text-gray-600 text-xl" />
+              <span className="font-medium text-gray-700">Profile</span>
+            </Link>
+          )}
           {user ? (
             <button
               onClick={handleLogout}
@@ -270,214 +300,134 @@ export default function NavBar() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <ul className="md:hidden px-4 pb-4 text-gray-800 space-y-2">
-          {/* Show all links before login */}
-          {!user && (
-            <>
-              <li>
+        <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg">
+          <div className="flex flex-col p-4">
+            {/* Mobile Links */}
+            {user && userRole === "farmer" && (
+              <>
                 <Link
-                  to={navigationLinks.marketplace.path}
-                  className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                  onClick={() => setMenuOpen(false)}
+                  to={navigationLinks.dashboard?.path || "/dashboard"}
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
                 >
-                  <FaStore className="inline mr-2" /> Marketplace
+                  <FaChartLine className="text-green-600" />
+                  <span className="font-medium">Dashboard</span>
                 </Link>
-              </li>
-              <li>
+                <Link
+                  to={navigationLinks.weatherDashboard.path}
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                >
+                  <FaCloudSun className="text-green-600" />
+                  <span className="font-medium">Weather</span>
+                </Link>
+              </>
+            )}
+            {/* Admin links */}
+            {user && userRole === "admin" && (
+              <>
+                <Link
+                  to={navigationLinks.dashboard?.path || "/dashboard"}
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                >
+                  <FaChartLine className="text-green-600" />
+                  <span className="font-medium">Dashboard</span>
+                </Link>
+
                 <Link
                   to={navigationLinks.map?.path || "/map"}
-                  className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                  onClick={() => setMenuOpen(false)}
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
                 >
-                  <FaMapMarkerAlt className="inline mr-2" /> Farm Map
+                  <FaMapMarkerAlt className="text-green-600" />
+                  <span className="font-medium">Farm Map</span>
                 </Link>
-              </li>
-              <li>
+              </>
+            )}
+            {/* Common links: only show when user is not logged in and no role detected */}
+            {!user && !userRole && (
+              <>
                 <Link
-                  to={navigationLinks.messages?.path || "/messages"}
-                  className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                  onClick={() => setMenuOpen(false)}
+                  to="/marketplace"
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
                 >
-                  <FaCommentDots className="inline mr-2" /> Messages
+                  <FaStore className="text-green-600" />
+                  <span className="font-medium">Marketplace</span>
                 </Link>
-              </li>
-              <li>
                 <Link
-                  to={"/profile"}
-                  className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                  onClick={() => setMenuOpen(false)}
+                  to="/crop-management"
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                  onClick={() => localStorage.setItem("selectedRole", "farmer")}
                 >
-                  <FaUser className="inline mr-2" /> Profile
+                  <FaLeaf className="text-green-600" />
+                  <span className="font-medium">Crop Management</span>
                 </Link>
-              </li>
-              <li>
+                <Link
+                  to="/pest-detection"
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                  onClick={() => localStorage.setItem("selectedRole", "farmer")}
+                >
+                  <FaBug className="text-green-600" />
+                  <span className="font-medium">Pest Detection</span>
+                </Link>
+                <Link
+                  to="/weather-dashboard"
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                >
+                  <FaCloudSun className="text-green-600" />
+                  <span className="font-medium">Weather</span>
+                </Link>
+                <Link
+                  to="/map"
+                  className="px-3 py-2 rounded hover:bg-green-50 flex items-center gap-1"
+                >
+                  <FaMapMarkerAlt className="text-green-600" />
+                  <span className="font-medium">Farm Map</span>
+                </Link>
+              </>
+            )}
+            {/* Search, Notification, Profile */}
+            <button
+              className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+              title="Search"
+            >
+              <FaSearch />
+            </button>
+            <button
+              className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+              title="Notifications"
+            >
+              <FaBell />
+            </button>
+            <Link
+              to={"/profile"}
+              className="ml-2 flex flex-row items-center gap-2"
+            >
+              <ProfileIcon profile={profile} user={user} />
+              <span className="font-medium text-gray-700">Profile</span>
+            </Link>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="ml-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
                 <Link
                   to="/login"
-                  className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition text-sm mb-2"
-                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition text-sm"
                 >
-                  <FaUser className="inline mr-2" /> Login
+                  <FaUser className="text-gray-600" /> Login
                 </Link>
-              </li>
-              <li>
                 <Link
                   to="/register"
-                  className="block bg-green-700 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-800 transition text-sm"
-                  onClick={() => setMenuOpen(false)}
+                  className="bg-green-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-green-800 transition text-sm"
                 >
                   Get Started
                 </Link>
-              </li>
-            </>
-          )}
-
-          {user && (
-            <>
-              {user.role === "admin" && (
-                <>
-                  <li>
-                    <Link
-                      to={navigationLinks.marketplace.path}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaStore className="inline mr-2" /> Marketplace
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to={navigationLinks.dashboard?.path || "/dashboard"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaChartLine className="inline mr-2" /> Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to={navigationLinks.map?.path || "/map"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaMapMarkerAlt className="inline mr-2" /> Farm Map
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to={navigationLinks.messages?.path || "/messages"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaCommentDots className="inline mr-2" /> Messages
-                    </Link>
-                  </li>
-                </>
-              )}
-              {user.role === "farmer" && (
-                <>
-                  <li>
-                    <Link
-                      to={navigationLinks.dashboard?.path || "/dashboard"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaChartLine className="inline mr-2" /> Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to={navigationLinks.map?.path || "/map"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaMapMarkerAlt className="inline mr-2" /> Farm Map
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to={navigationLinks.messages?.path || "/messages"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaCommentDots className="inline mr-2" /> Messages
-                    </Link>
-                  </li>
-                </>
-              )}
-              {user.role === "customer" && (
-                <>
-                  <li>
-                    <Link
-                      to={navigationLinks.marketplace.path}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaStore className="inline mr-2" /> Marketplace
-                    </Link>
-                  </li>
-
-                  <li>
-                    <Link
-                      to={navigationLinks.messages?.path || "/messages"}
-                      className="block px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition"
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <FaCommentDots className="inline mr-2" /> Messages
-                    </Link>
-                  </li>
-                </>
-              )}
-              <li>
-                <Link
-                  to={"/profile"}
-                  className="block px-4 py-2 rounded-full bg-green-600 text-white font-semibold mb-2"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {profile?.avatar ? (
-                    <img
-                      src={profile.avatar}
-                      alt="Avatar"
-                      className="w-8 h-8 rounded-full object-cover inline mr-2"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="inline-block w-8 h-8 rounded-full bg-green-700 text-white text-center leading-8 font-bold mr-2">
-                      {profile?.firstName?.charAt(0) ||
-                        user?.firstName?.charAt(0) ||
-                        "U"}
-                    </span>
-                  )}
-                  Profile
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="w-full bg-red-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-600 transition"
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          )}
-
-          <li>
-            <button
-              className="w-full text-left px-4 py-2 rounded-full hover:bg-gray-100 transition"
-              title="Search"
-            >
-              <FaSearch className="inline mr-2" /> Search
-            </button>
-          </li>
-          <li>
-            <button
-              className="w-full text-left px-4 py-2 rounded-full hover:bg-gray-100 transition"
-              title="Notifications"
-            >
-              <FaBell className="inline mr-2" /> Notifications
-            </button>
-          </li>
-        </ul>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </nav>
   );

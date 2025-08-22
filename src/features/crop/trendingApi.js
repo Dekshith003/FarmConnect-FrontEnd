@@ -1,7 +1,7 @@
-import api from "../../services/api";
+import axiosInstance from "../../services/axiosInstance";
 
 export const getTrendingCrops = () =>
-  api({
+  axiosInstance({
     method: "GET",
     url: "/trending",
   });

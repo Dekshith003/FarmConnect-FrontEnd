@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchCrops, createCrop, editCrop, removeCrop } from "./cropThunks";
+import {
+  fetchCrops,
+  createCrop,
+  removeCrop,
+  fetchFarmerCrops,
+} from "./cropThunks";
 import { fetchTrendingCrops } from "./trendingThunks";
 
 const initialState = {
@@ -39,9 +44,32 @@ const cropSlice = createSlice({
       })
       .addCase(fetchCrops.fulfilled, (state, action) => {
         state.loading = false;
-        state.crops = action.payload;
+        // If payload is { crops: [...] }, store crops array
+        state.crops = Array.isArray(action.payload)
+          ? action.payload
+          : Array.isArray(action.payload?.crops)
+          ? action.payload.crops
+          : [];
       })
       .addCase(fetchCrops.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to fetch crops";
+      })
+
+      // Handle fetchFarmerCrops
+      .addCase(fetchFarmerCrops.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchFarmerCrops.fulfilled, (state, action) => {
+        state.loading = false;
+        state.crops = Array.isArray(action.payload)
+          ? action.payload
+          : Array.isArray(action.payload?.crops)
+          ? action.payload.crops
+          : [];
+      })
+      .addCase(fetchFarmerCrops.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch crops";
       })
@@ -52,29 +80,18 @@ const cropSlice = createSlice({
       })
       .addCase(createCrop.fulfilled, (state, action) => {
         state.loading = false;
-        state.crops.push(action.payload);
+        if (!Array.isArray(state.crops)) {
+          state.crops = [action.payload];
+        } else {
+          state.crops.push(action.payload);
+        }
         state.success = "Crop added successfully";
       })
       .addCase(createCrop.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to add crop";
       })
-      .addCase(editCrop.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.success = null;
-      })
-      .addCase(editCrop.fulfilled, (state, action) => {
-        state.loading = false;
-        state.crops = state.crops.map((crop) =>
-          crop._id === action.payload._id ? action.payload : crop
-        );
-        state.success = "Crop updated successfully";
-      })
-      .addCase(editCrop.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to update crop";
-      })
+
       .addCase(removeCrop.pending, (state) => {
         state.loading = true;
         state.error = null;

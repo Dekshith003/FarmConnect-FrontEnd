@@ -7,25 +7,11 @@ export const fetchCropRecommendations = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await aiApi.getCropRecommendations(data);
-      return response.data;
+      console.log("Crop Recommendations API response:", response.data);
+      return response.data.recommendations;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch crop recommendations"
-      );
-    }
-  }
-);
-
-// AI Buyer Recommendations for Customers
-export const fetchBuyerRecommendations = createAsyncThunk(
-  "ai/fetchBuyerRecommendations",
-  async (data, { rejectWithValue }) => {
-    try {
-      const response = await aiApi.getBuyerRecommendations(data);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch buyer recommendations"
       );
     }
   }

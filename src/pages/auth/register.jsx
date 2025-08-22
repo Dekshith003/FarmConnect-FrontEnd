@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { register, verifyRegistration } from "../../features/auth/authThunks";
-import { clearMessage } from "../../features/auth/authSlice";
+import { registerUser, verifyOtp } from "../../features/auth/authThunks";
+import { clearAuthError } from "../../features/auth/authSlice";
 import {
   Leaf,
   ArrowLeft,
@@ -39,6 +39,13 @@ export default function Register() {
   const { loading, error, message, registrationId, otpVerified } = useSelector(
     (state) => state.auth
   );
+
+  // Navigate to login after successful OTP verification
+  useEffect(() => {
+    if (otpVerified) {
+      navigate("/login");
+    }
+  }, [otpVerified, navigate]);
 
   const validateField = (name, value) => {
     switch (name) {
@@ -118,7 +125,7 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(clearMessage());
+    dispatch(clearAuthError());
     if (!agree) {
       setErrors((prev) => ({
         ...prev,
@@ -133,31 +140,33 @@ export default function Register() {
       }));
       return;
     }
+    // Fix: define payload before using it
     const payload = { ...formData, role };
     delete payload.confirmPassword;
-    dispatch(register(payload));
-    setShowOtp(true);
+    dispatch(registerUser(payload)).then((action) => {
+      console.log("Registration action payload:", action.payload);
+      if (
+        action.payload &&
+        (action.payload.registrationId ||
+          action.payload.message === "OTP sent for verification")
+      ) {
+        // Pass role to VerifyOtp page for OTP verification
+        navigate("/verify-otp", {
+          state: {
+            registrationId: action.payload.registrationId || formData.email,
+            role: payload.role,
+          },
+        });
+      } else if (action.payload && action.payload.message) {
+        setErrors((prev) => ({ ...prev, form: action.payload.message }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          form: "Registration failed: No email returned.",
+        }));
+      }
+    });
   };
-
-  const handleOtpSubmit = (e) => {
-    e.preventDefault();
-    if (!otp) {
-      setErrors((prev) => ({ ...prev, otp: "Please enter the OTP." }));
-      return;
-    }
-    dispatch(verifyRegistration({ registrationId, otp }));
-  };
-
-  useEffect(() => {
-    if (otpVerified) {
-      setTimeout(() => {
-        dispatch(clearMessage());
-        navigate("/login");
-      }, 1500);
-    }
-  }, [otpVerified, dispatch, navigate]);
-
-  // --- Role Selection UI ---
   if (!role) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center bg-[#f5f3ec] p-4">
@@ -407,48 +416,7 @@ export default function Register() {
     );
   }
 
-  // --- OTP Verification UI ---
-  if (showOtp && registrationId && !otpVerified) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f3ec] p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold text-green-900 mb-4">Verify OTP</h2>
-          <p className="mb-4 text-gray-700">
-            Enter the OTP sent to your email/phone to complete registration.
-          </p>
-          <form onSubmit={handleOtpSubmit} className="space-y-4">
-            <input
-              type="text"
-              name="otp"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className={`w-full p-2 border rounded ${
-                errors.otp ? "border-red-500" : ""
-              }`}
-              required
-            />
-            {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
-            {error && (
-              <p className="text-red-600 text-sm">
-                {typeof error === "string" ? error : error?.message}
-              </p>
-            )}
-            {message && <p className="text-green-700 text-sm">{message}</p>}
-            <button
-              type="submit"
-              className="w-full bg-green-700 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-green-800 transition"
-              disabled={loading}
-            >
-              {loading ? "Verifying..." : "Verify & Complete Registration"}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Registration Form UI ---
+  //register ui
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f3ec] p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl relative">
@@ -801,9 +769,14 @@ export default function Register() {
                 {typeof error === "string" ? error : error?.message}
               </p>
             )}
-            {message && (
+            {/*
+            {message === "Email exists" && (
+              <p className="text-center text-red-600 mt-2">{message}</p>
+            )}
+            {message && message !== "Email exists" && (
               <p className="text-center text-green-700 mt-2">{message}</p>
             )}
+            */}
             <p className="text-center text-gray-600 mt-2">
               Already have an account?{" "}
               <Link

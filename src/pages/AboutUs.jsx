@@ -217,7 +217,7 @@ function AboutUs() {
           are committed to sustainable agriculture and fair trade.
         </p>
         <Link
-          to="/contact-us"
+          to="/contact"
           className="inline-block bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
         >
           Contact Us to Join
@@ -237,7 +237,7 @@ function AboutUs() {
         </p>
         <div className="flex justify-center space-x-4">
           <Link
-            to="/contact-us"
+            to="/contact"
             className="bg-white text-green-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition"
           >
             Contact Us

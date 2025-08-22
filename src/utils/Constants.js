@@ -7,10 +7,13 @@ export const navigationLinks = {
   login: { path: "/login" },
   profile: { path: "/profile" },
   marketplace: { path: "/marketplace" },
+  cropManagement: { path: "/crops" },
   weatherDashboard: { path: "/weather-dashboard" },
-  message: { path: "/message" },
   dashboard: { path: "/dashboard" },
   map: { path: "/map" },
+  aiCropRecommendations: { path: "/ai/recommend/crop" },
+  aiPredict: { path: "/ai/predict" },
+  aiRecommend: { path: "/ai/recommend" },
 };
 
 export const apiEndpoints = {
@@ -27,15 +30,9 @@ export const apiEndpoints = {
     getProfile: { method: "GET", url: "/profile" },
     updateProfile: { method: "PUT", url: "/profile" },
   },
-  chat: {
-    getChats: { method: "GET", url: "/chat" },
-    getMessages: { method: "GET", url: "/chat/:id/messages" },
-    sendMessage: { method: "POST", url: "/chat/:id/messages" },
-  },
   crop: {
-    getCrops: { method: "GET", url: "/crop" },
-    addCrop: { method: "POST", url: "/crop" },
-    updateCrop: { method: "PUT", url: "/crop/:id" },
+    getMyCrops: { method: "GET", url: "/crop/my-listings" },
+    addCrop: { method: "POST", url: "/crop/post" },
     deleteCrop: { method: "DELETE", url: "/crop/:id" },
   },
   marketplace: {
@@ -60,8 +57,7 @@ export const apiEndpoints = {
   },
   ai: {
     cropRecommendations: { method: "POST", url: "/ai/recommend/crop" },
-    buyerRecommendations: { method: "POST", url: "/ai/recommend/buyer" },
     predict: { method: "POST", url: "/ai/predict" },
-    recommend: { method: "POST", url: "/ai/recommend" },
+    // recommend endpoint removed
   },
 };

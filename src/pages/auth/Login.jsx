@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Leaf, ArrowLeft, ShoppingBag } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../features/auth/authThunks";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Leaf, ArrowLeft, ShoppingBag } from "lucide-react";
+import { loginUser } from "../../features/auth/authThunks";
 
 export default function Login() {
   const [role, setRole] = useState(null);
@@ -10,7 +10,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading, error, user } = useSelector((state) => state.auth);
+
+  // Autofill email if passed from registration/OTP
+  useEffect(() => {
+    if (location.state && location.state.email) {
+      setFormData((prev) => ({ ...prev, email: location.state.email }));
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,13 +29,24 @@ export default function Login() {
     e.preventDefault();
     if (!role) return;
     dispatch(
-      login({
+      loginUser({
         email: formData.email,
         password: formData.password,
         role,
       })
     ).then((res) => {
+      console.log(res);
       if (res.meta.requestStatus === "fulfilled") {
+        // Store user details, role, and token in localStorage
+        const userData = res.payload?.user || res.payload;
+        const token = res.payload?.token || res.payload?.userDetails?.token;
+        if (userData) {
+          localStorage.setItem("user", JSON.stringify(userData));
+          localStorage.setItem("role", userData.role || role);
+        }
+        if (token) {
+          localStorage.setItem("token", token);
+        }
         // Redirect to dashboard or home after login
         navigate("/");
       }

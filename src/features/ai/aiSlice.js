@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   fetchCropRecommendations,
-  fetchBuyerRecommendations,
   fetchPrediction,
   fetchRecommendations,
 } from "./aiThunks";
+
+// import { fetchCropRecommendations } from "./aiThunks";
 
 const initialState = {
   cropRecommendations: {
@@ -12,11 +13,7 @@ const initialState = {
     loading: false,
     error: null,
   },
-  buyerRecommendations: {
-    data: [],
-    loading: false,
-    error: null,
-  },
+  // buyerRecommendations removed
   predictions: {
     data: null,
     loading: false,
@@ -37,10 +34,7 @@ const aiSlice = createSlice({
       state.cropRecommendations.data = [];
       state.cropRecommendations.error = null;
     },
-    clearBuyerRecommendations: (state) => {
-      state.buyerRecommendations.data = [];
-      state.buyerRecommendations.error = null;
-    },
+    // clearBuyerRecommendations removed
     clearPredictions: (state) => {
       state.predictions.data = null;
       state.predictions.error = null;
@@ -53,32 +47,19 @@ const aiSlice = createSlice({
   extraReducers: (builder) => {
     // Crop Recommendations
     builder
-      .addCase(fetchCropRecommendations.pending, (state) => {
+      .addCase(fetchCropRecommendations.pending, (state, action) => {
         state.cropRecommendations.loading = true;
         state.cropRecommendations.error = null;
+        console.log("Fetching crop recommendations...", action.payload);
       })
       .addCase(fetchCropRecommendations.fulfilled, (state, action) => {
         state.cropRecommendations.loading = false;
         state.cropRecommendations.data = action.payload;
+        console.log(action.payload);
       })
       .addCase(fetchCropRecommendations.rejected, (state, action) => {
         state.cropRecommendations.loading = false;
         state.cropRecommendations.error = action.payload;
-      });
-
-    // Buyer Recommendations
-    builder
-      .addCase(fetchBuyerRecommendations.pending, (state) => {
-        state.buyerRecommendations.loading = true;
-        state.buyerRecommendations.error = null;
-      })
-      .addCase(fetchBuyerRecommendations.fulfilled, (state, action) => {
-        state.buyerRecommendations.loading = false;
-        state.buyerRecommendations.data = action.payload;
-      })
-      .addCase(fetchBuyerRecommendations.rejected, (state, action) => {
-        state.buyerRecommendations.loading = false;
-        state.buyerRecommendations.error = action.payload;
       });
 
     // Predictions
@@ -115,7 +96,7 @@ const aiSlice = createSlice({
 
 export const {
   clearCropRecommendations,
-  clearBuyerRecommendations,
+  // clearBuyerRecommendations removed
   clearPredictions,
   clearRecommendations,
 } = aiSlice.actions;

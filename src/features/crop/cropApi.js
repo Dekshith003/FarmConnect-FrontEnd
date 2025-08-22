@@ -1,28 +1,28 @@
-import api from "../../services/api";
+// Get crops for a specific farmer
+export const getFarmerCrops = (farmerId) =>
+  axiosInstance({
+    method: "GET",
+    url: `/crop/farmer/${farmerId}/crops?t=${Date.now()}`,
+  });
+import axiosInstance from "../../services/axiosInstance";
 import { apiEndpoints } from "../../utils/Constants";
 
 export const getCrops = () =>
-  api({
-    method: apiEndpoints.crop.getCrops.method,
-    url: apiEndpoints.crop.getCrops.url,
+  axiosInstance({
+    method: apiEndpoints.crop.getMyCrops.method,
+    url: `${apiEndpoints.crop.getMyCrops.url}?t=${Date.now()}`,
   });
 
 export const addCrop = (cropData) =>
-  api({
+  axiosInstance({
     method: apiEndpoints.crop.addCrop.method,
     url: apiEndpoints.crop.addCrop.url,
     data: cropData,
-  });
-
-export const updateCrop = (id, cropData) =>
-  api({
-    method: apiEndpoints.crop.updateCrop.method,
-    url: apiEndpoints.crop.updateCrop.url.replace(":id", id),
-    data: cropData,
+    headers: { "Content-Type": "multipart/form-data" },
   });
 
 export const deleteCrop = (id) =>
-  api({
+  axiosInstance({
     method: apiEndpoints.crop.deleteCrop.method,
     url: apiEndpoints.crop.deleteCrop.url.replace(":id", id),
   });

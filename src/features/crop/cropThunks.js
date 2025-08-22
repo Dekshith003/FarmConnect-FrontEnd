@@ -1,5 +1,18 @@
+import { getFarmerCrops } from "./cropApi";
+// Fetch crops for a specific farmer
+export const fetchFarmerCrops = createAsyncThunk(
+  "crop/fetchFarmerCrops",
+  async (farmerId, { rejectWithValue }) => {
+    try {
+      const res = await getFarmerCrops(farmerId);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getCrops, addCrop, updateCrop, deleteCrop } from "./cropApi";
+import { getCrops, addCrop, deleteCrop } from "./cropApi";
 
 export const fetchCrops = createAsyncThunk(
   "crop/fetchCrops",
@@ -25,18 +38,7 @@ export const createCrop = createAsyncThunk(
   }
 );
 
-export const editCrop = createAsyncThunk(
-  "crop/editCrop",
-  async ({ id, cropData }, { rejectWithValue }) => {
-    try {
-      const res = await updateCrop(id, cropData);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
+// delete crops
 export const removeCrop = createAsyncThunk(
   "crop/removeCrop",
   async (id, { rejectWithValue }) => {

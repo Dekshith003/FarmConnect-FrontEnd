@@ -1,34 +1,24 @@
-import api from "../../services/api";
+import axiosInstance from "../../services/axiosInstance";
 import { apiEndpoints } from "../../utils/Constants";
 
 export const aiApi = {
   // AI Crop Recommendations for Farmers
   getCropRecommendations: (data) =>
-    api({
+    axiosInstance({
       method: "POST",
-      url: "/ai/recommend/crop",
-      data,
+      url: "/ai/recommend/crops",
+      data: { context: data },
     }),
 
-  // AI Buyer Recommendations for Customers
-  getBuyerRecommendations: (data) =>
-    api({
-      method: "POST",
-      url: "/ai/recommend/buyer",
-      data,
-    }),
-
-  // AI Predictions
   getPrediction: (input) =>
-    api({
+    axiosInstance({
       method: "POST",
       url: "/ai/predict",
       data: { input },
     }),
 
-  // AI General Recommendations
   getRecommendations: (context) =>
-    api({
+    axiosInstance({
       method: "POST",
       url: "/ai/recommend",
       data: { context },

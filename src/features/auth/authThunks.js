@@ -1,187 +1,123 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  loginUser,
-  registerUser,
-  verifyRegistrationApi,
-  forgotPassword as forgotPasswordApi,
-  resetPassword as resetPasswordApi,
-  changePassword as changePasswordApi,
-  logoutUser as logoutUserApi,
-  emailVerification as emailVerificationApi,
+  loginAPI,
+  registerAPI,
+  forgotPasswordAPI,
+  resetPasswordAPI,
+  sendOtpAPI,
+  verifyOtpAPI,
+  getProfileAPI,
+  changePasswordAPI,
 } from "./authApi";
 
-export const login = createAsyncThunk(
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async ({ currentPassword, newPassword }, thunkAPI) => {
+    try {
+      const res = await changePasswordAPI({ currentPassword, newPassword });
+      return res.data.message || "Password changed successfully";
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Change password failed"
+      );
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
   "auth/login",
-  async (credentials, { rejectWithValue }) => {
+  async (credentials, thunkAPI) => {
     try {
-      // Debug: Login attempt with credentials
-      // console.log("Login attempt with credentials:", credentials);
-      const res = await loginUser(credentials);
-      // Debug: Login response
-      // console.log("Login response:", res);
+      const res = await loginAPI(credentials);
       return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Login error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Login failed"
+      );
     }
   }
 );
 
-export const register = createAsyncThunk(
+export const registerUser = createAsyncThunk(
   "auth/register",
-  async (userData, { rejectWithValue }) => {
+  async (userData, thunkAPI) => {
     try {
-      // Debug: Registration attempt with data
-      // console.log("Registration attempt with data:", userData);
-      const res = await registerUser(userData);
-      // Debug: Registration response
-      // console.log("Registration response:", res);
-      return res.data; // { registrationId, message }
-    } catch (err) {
-      // Error handling for production
-      console.error("Registration error:", err);
-
-      // Log specific validation errors for debugging
-      if (err.response?.data?.errors) {
-        Object.entries(err.response?.data?.errors).forEach(
-          ([field, messages]) => {
-            console.error(`Field ${field}:`, messages);
-          }
-        );
-      }
-
-      return rejectWithValue({
-        message: err.response?.data?.message || "Registration failed",
-        errors: err.response?.data?.errors || {},
-        status: err.response?.status,
-      });
-    }
-  }
-);
-
-export const verifyRegistration = createAsyncThunk(
-  "auth/verifyRegistration",
-  async (data, { rejectWithValue }) => {
-    try {
-      // Debug: Verify registration attempt with data
-      // console.log("Verify registration attempt with data:", data);
-      const res = await verifyRegistrationApi(data);
-      // Debug: Verify registration response
-      // console.log("Verify registration response:", res);
-      return res.data; // { user, token }
-    } catch (err) {
-      // Error handling for production
-      console.error("Verify registration error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      const res = await registerAPI(userData);
+      return res.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Registration failed"
+      );
     }
   }
 );
 
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
-  async ({ email, role }, { rejectWithValue }) => {
+  async (email, thunkAPI) => {
     try {
-      // Debug: Forgot password attempt
-      // console.log("Forgot password attempt:", { email, role });
-      const res = await forgotPasswordApi(email, role);
-      // Debug: Forgot password response
-      // console.log("Forgot password response:", res);
-      return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Forgot password error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      const res = await forgotPasswordAPI(email);
+      return res.data.message;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Forgot password failed"
+      );
     }
   }
 );
 
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
-  async ({ email, otp, role, newPassword }, { rejectWithValue }) => {
+  async (data, thunkAPI) => {
     try {
-      // Debug: Reset password attempt
-      // console.log("Reset password attempt:", { email, otp, role, newPassword });
-      const res = await resetPasswordApi({
-        email,
-        otp,
-        role,
-        newPassword,
-      });
-      // Debug: Reset password response
-      // console.log("Reset password response:", res);
-      return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Reset password error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      const res = await resetPasswordAPI(data);
+      return res.data.message;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Reset password failed"
+      );
     }
   }
 );
 
-export const changePassword = createAsyncThunk(
-  "auth/changePassword",
-  async (data, { rejectWithValue }) => {
+export const sendOtp = createAsyncThunk(
+  "auth/sendOtp",
+  async ({ email }, thunkAPI) => {
     try {
-      // Debug: Change password attempt
-      // console.log("Change password attempt:", data);
-      const res = await changePasswordApi(data);
-      // Debug: Change password response
-      // console.log("Change password response:", res);
-      return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Change password error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      await sendOtpAPI({ email });
+      return email;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Send OTP failed"
+      );
     }
   }
 );
 
-export const logoutUserThunk = createAsyncThunk(
-  "auth/logout",
-  async (_, { rejectWithValue }) => {
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async (details, thunkAPI) => {
     try {
-      // Debug: Logout attempt
-      // console.log("Logout attempt");
-      const res = await logoutUserApi();
-      // Debug: Logout response
-      // console.log("Logout response:", res);
+      const res = await verifyOtpAPI(details);
       return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Logout error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Verify OTP failed"
+      );
     }
   }
 );
 
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, { dispatch }) => {
-    // Debug: Initiating logout process
-    // console.log("Initiating logout process");
-    await dispatch(logoutUserThunk());
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // Debug: Logout completed
-    // console.log("Logout completed - token and user removed from localStorage");
-  }
-);
-
-export const emailVerification = createAsyncThunk(
-  "auth/emailVerification",
-  async (data, { rejectWithValue }) => {
+export const getProfile = createAsyncThunk(
+  "auth/getProfile",
+  async (_, thunkAPI) => {
     try {
-      // Debug: Email verification attempt
-      // console.log("Email verification attempt:", data);
-      const res = await emailVerificationApi(data);
-      // Debug: Email verification response
-      // console.log("Email verification response:", res);
+      const res = await getProfileAPI();
       return res.data;
-    } catch (err) {
-      // Error handling for production
-      console.error("Email verification error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Get profile failed"
+      );
     }
   }
 );

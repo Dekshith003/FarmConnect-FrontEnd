@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import WeatherWidget from "./WeatherWidget";
+import WeatherAlerts from "../../components/WeatherAlerts";
+import FarmMap from "../../components/FarmMap";
 
 const OPENWEATHER_API_KEY = "b8603bcaa7040db8fc80ebd88fe4c5a2";
 
@@ -76,16 +78,8 @@ export default function WeatherDashboard() {
             Real-time weather data and farming insights
           </p>
         </div>
-        {/* Alerts not available in free API */}
-        <div className="space-y-3 mb-6">
-          {loading && <div>Loading weather data...</div>}
-          {error && <div className="text-red-600">{error}</div>}
-          {!loading && (
-            <div className="text-gray-500">
-              Weather alerts are not available in the free OpenWeatherMap API.
-            </div>
-          )}
-        </div>
+        {/* IMD Telangana Weather Alerts */}
+        <WeatherAlerts />
         {/* Current Weather Card */}
         <div className="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
           <WeatherWidget
@@ -135,26 +129,22 @@ export default function WeatherDashboard() {
             ))}
           </div>
         </div>
-        {/* Weather Map (static placeholder) */}
+        {/* Weather Map (OpenWeatherMap widget for Telangana) */}
         <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col items-center">
           <h2 className="text-lg font-bold mb-2">Weather Map</h2>
           <div className="w-full h-56 sm:h-80 rounded flex items-center justify-center">
-            {/* OpenWeatherMap embed widget for current location */}
-            {currentWeather && currentWeather.coord ? (
-              <iframe
-                title="Weather Map"
-                src={`https://openweathermap.org/weathermap?basemap=map&cities=true&layer=temperature&lat=${currentWeather.coord.lat}&lon=${currentWeather.coord.lon}&zoom=7`}
-                width="100%"
-                height="100%"
-                className="rounded-lg min-h-[220px] sm:min-h-[320px]"
-                style={{ border: 0 }}
-                allowFullScreen
-              />
-            ) : (
-              <span className="text-gray-400 text-lg">Loading map...</span>
-            )}
+            <iframe
+              title="OpenWeatherMap"
+              src="https://openweathermap.org/weathermap?basemap=map&cities=true&layer=temperature&lat=17.385&lon=78.4867&zoom=7"
+              width="100%"
+              height="100%"
+              className="rounded-lg min-h-[220px] sm:min-h-[320px]"
+              style={{ border: 0 }}
+              allowFullScreen
+            />
           </div>
         </div>
+
         {/* Soil Stats (static) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-6">
           <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col items-center w-full">

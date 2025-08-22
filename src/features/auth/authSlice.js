@@ -1,25 +1,46 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  login,
-  register,
-  verifyRegistration,
-  forgotPassword as forgotPasswordThunk,
+  loginUser,
+  registerUser,
+  forgotPassword,
   resetPassword,
+  sendOtp,
+  verifyOtp,
+  getProfile,
   changePassword,
-  emailVerification,
-  logoutUserThunk,
 } from "./authThunks";
 
 const token = localStorage.getItem("token");
-const user = token ? JSON.parse(localStorage.getItem("user")) : null;
+let user = null;
+if (token) {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr);
+    } catch (e) {
+      user = null;
+      // Optionally clear invalid user data
+      localStorage.removeItem("user");
+    }
+  }
+}
 
 const initialState = {
   user,
   token,
-  loading: false,
+  isAuthenticated: !!token,
+  isLoading: {
+    login: false,
+    register: false,
+    forgotPassword: false,
+    resetPassword: false,
+    sendOtp: false,
+    verifyOtp: false,
+    changePassword: false,
+  },
   error: null,
-  message: null,
-  registrationId: null,
+  message: "",
+  otpEmail: "",
   otpVerified: false,
 };
 
@@ -27,148 +48,142 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout(state) {
+    logoutUser: (state) => {
       state.user = null;
       state.token = null;
-      state.registrationId = null;
-      state.otpVerified = false;
+      state.isAuthenticated = false;
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
-    clearMessage(state) {
-      state.message = null;
+    clearAuthError: (state) => {
       state.error = null;
+      state.message = "";
+    },
+    setOtpEmail: (state, action) => {
+      state.otpEmail = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      // login
-      .addCase(login.pending, (state) => {
-        state.loading = true;
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading.login = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading.login = false;
+        if (action.payload.userDetails) {
+          const rawUser = action.payload.userDetails.user || {};
+          console.log(rawUser);
+          const normalizedUser = {
+            ...rawUser,
+            _id: rawUser.id || rawUser._id || null,
+            role: rawUser.userrole || rawUser.role || null,
+          };
+          state.user = normalizedUser;
+          state.token = action.payload.userDetails.token;
+          state.isAuthenticated = true;
+          localStorage.setItem("token", action.payload.userDetails.token);
+          localStorage.setItem("user", JSON.stringify(normalizedUser));
+        } else {
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.isAuthenticated = true;
+          localStorage.setItem("token", action.payload.token);
+          localStorage.setItem("user", JSON.stringify(action.payload.user));
+        }
       })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Login failed";
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading.login = false;
+        state.error = action.payload;
       })
-
-      // initiate register (send OTP)
-      .addCase(register.pending, (state) => {
-        state.loading = true;
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading.register = true;
         state.error = null;
-        state.message = null;
-        state.registrationId = null;
       })
-      .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
-        state.registrationId = action.payload.registrationId;
-        state.message =
-          action.payload.message || "OTP sent to your phone/email";
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading.register = false;
+        state.message = action.payload.message || "Registration successful";
       })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to initiate registration";
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading.register = false;
+        state.error = action.payload;
       })
-
-      // verify OTP and complete registration
-      .addCase(verifyRegistration.pending, (state) => {
-        state.loading = true;
+      .addCase(forgotPassword.pending, (state) => {
+        state.isLoading.forgotPassword = true;
         state.error = null;
-        state.message = null;
       })
-      .addCase(verifyRegistration.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.otpVerified = true;
-        localStorage.setItem("token", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      .addCase(forgotPassword.fulfilled, (state, action) => {
+        state.isLoading.forgotPassword = false;
+        state.message = action.payload;
       })
-      .addCase(verifyRegistration.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "OTP verification failed";
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading.forgotPassword = false;
+        state.error = action.payload;
       })
-
-      // forgot password
-      .addCase(forgotPasswordThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.message = null;
-      })
-      .addCase(forgotPasswordThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.message = action.payload.message || "Reset link sent to email";
-      })
-      .addCase(forgotPasswordThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to send reset link";
-      })
-
-      // reset password
       .addCase(resetPassword.pending, (state) => {
-        state.loading = true;
+        state.isLoading.resetPassword = true;
         state.error = null;
-        state.message = null;
       })
       .addCase(resetPassword.fulfilled, (state, action) => {
-        state.loading = false;
-        state.message = action.payload.message || "Password reset successful";
+        state.isLoading.resetPassword = false;
+        state.message = action.payload;
       })
       .addCase(resetPassword.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to reset password";
+        state.isLoading.resetPassword = false;
+        state.error = action.payload;
       })
-
-      // change password
-      .addCase(changePassword.pending, (state) => {
-        state.loading = true;
+      .addCase(sendOtp.pending, (state) => {
+        state.isLoading.sendOtp = true;
         state.error = null;
-        state.message = null;
+      })
+      .addCase(sendOtp.fulfilled, (state, action) => {
+        state.isLoading.sendOtp = false;
+        state.otpEmail = action.payload;
+      })
+      .addCase(sendOtp.rejected, (state, action) => {
+        state.isLoading.sendOtp = false;
+        state.error = action.payload;
+      })
+      .addCase(verifyOtp.pending, (state) => {
+        state.isLoading.verifyOtp = true;
+        state.error = null;
+      })
+      .addCase(verifyOtp.fulfilled, (state, action) => {
+        state.isLoading.verifyOtp = false;
+        state.otpVerified = true;
+        state.message = "OTP verified successfully";
+      })
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.isLoading.verifyOtp = false;
+        state.error = action.payload;
+      })
+      .addCase(getProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        localStorage.setItem("user", JSON.stringify(action.payload));
+      })
+      .addCase(getProfile.rejected, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      })
+      // Change Password
+      .addCase(changePassword.pending, (state) => {
+        state.isLoading.changePassword = true;
+        state.error = null;
+        state.message = "";
       })
       .addCase(changePassword.fulfilled, (state, action) => {
-        state.loading = false;
-        state.message =
-          action.payload.message || "Password changed successfully";
+        state.isLoading.changePassword = false;
+        state.message = action.payload;
       })
       .addCase(changePassword.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to change password";
+        state.isLoading.changePassword = false;
+        state.error = action.payload;
       });
-    builder
-      .addCase(emailVerification.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.message = null;
-      })
-      .addCase(emailVerification.fulfilled, (state, action) => {
-        state.loading = false;
-        state.message =
-          action.payload.message || "Email verification successful";
-      })
-      .addCase(emailVerification.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Failed to verify email";
-      });
-
-    builder.addCase(logoutUserThunk.fulfilled, (state) => {
-      state.user = null;
-      state.token = null;
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    });
-    builder.addCase(logoutUserThunk.rejected, (state, action) => {
-      state.error = action.payload || "Logout failed";
-    });
   },
 });
 
-export const { logout, clearMessage } = authSlice.actions;
-
+export const { logoutUser, clearAuthError, setOtpEmail } = authSlice.actions;
 export default authSlice.reducer;
