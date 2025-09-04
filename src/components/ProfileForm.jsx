@@ -32,6 +32,7 @@ const CUSTOMER_FIELDS = [
 
 export default function ProfileForm({ profile, onSave, onCancel }) {
   const [form, setForm] = useState({ ...profile });
+  const [avatarFile, setAvatarFile] = useState(null);
 
   useEffect(() => {
     setForm({ ...profile });
@@ -53,6 +54,8 @@ export default function ProfileForm({ profile, onSave, onCancel }) {
       alert("File size should be less than 2MB.");
       return;
     }
+    setAvatarFile(file);
+    // Show preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setForm((prev) => ({ ...prev, avatar: reader.result }));
@@ -62,19 +65,29 @@ export default function ProfileForm({ profile, onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...profile, ...form });
+    const submitData = { ...form };
+    if (avatarFile) submitData.avatar = avatarFile;
+    onSave(submitData);
   };
 
   const role = (form.role || "").toLowerCase();
   const fields = role === "farmer" ? FARMER_FIELDS : CUSTOMER_FIELDS;
 
   return (
-    <form className="space-y-4 w-full" onSubmit={handleSubmit}>
+    <form
+      className="space-y-4 w-full"
+      onSubmit={handleSubmit}
+      encType="multipart/form-data"
+    >
       <div>
         <label className="block font-medium mb-1">Avatar</label>
         {form.avatar && (
           <img
-            src={form.avatar}
+            src={
+              typeof form.avatar === "string"
+                ? form.avatar
+                : URL.createObjectURL(form.avatar)
+            }
             alt="Avatar"
             className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-green-600"
           />

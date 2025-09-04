@@ -3,23 +3,25 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProfile,
   updateProfile,
+  createProfileThunk,
 } from "../../features/profile/profileThunks";
-import { fetchOrCreateProfile } from "../../features/profile/profileApi";
 import ProfileForm from "../../components/ProfileForm";
 import ProfileView from "./ProfileView";
 
 export default function Profile() {
   const dispatch = useDispatch();
   const { profile, loading, error } = useSelector((state) => state.profile);
-  const { user } = useSelector((state) => state.auth);
+  const userDetails = JSON.parse(localStorage.getItem("user"))?.userDetails;
+  const userId = userDetails?.id;
+  const role = userDetails?.role || userDetails?.userrole || "Farmer";
   const [editMode, setEditMode] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
   const triedCreateRef = useRef(false);
 
   // Fetch or create profile on mount
   useEffect(() => {
-    if (user?._id && !triedCreateRef.current) {
-      dispatch(fetchProfile(user._id)).then((action) => {
+    if (userId && !triedCreateRef.current) {
+      dispatch(fetchProfile({ userId, role })).then((action) => {
         if (
           action.type === "profile/fetchProfile/rejected" &&
           (action.payload?.message === "Profile not found" ||
@@ -27,36 +29,24 @@ export default function Profile() {
         ) {
           if (!triedCreateRef.current) {
             triedCreateRef.current = true;
-            // Create profile if not found, only with basic fields
-            const profileData = {
-              _id: user._id,
-              firstName: user.firstName || "",
-              lastName: user.lastName || "",
-              email: user.email || "",
-              role: user.role || "",
-              phone: user.phone || "",
-              address: user.address || "",
-              city: user.city || "",
-              state: user.state || "",
-              zip: user.zip || "",
-              avatar: "",
-            };
-            fetchOrCreateProfile(user._id, profileData).then(() => {
-              setProfileCreated(true);
-            });
+            dispatch(createProfileThunk({ userId, role, userDetails })).then(
+              () => {
+                setProfileCreated(true);
+              }
+            );
           }
         }
       });
     }
-  }, [dispatch, user]);
+  }, [dispatch, userId, role, userDetails]);
 
   // Refetch after creation
   useEffect(() => {
-    if (profileCreated && user?._id) {
-      dispatch(fetchProfile(user._id));
+    if (profileCreated && userId) {
+      dispatch(fetchProfile({ userId, role }));
       setProfileCreated(false);
     }
-  }, [profileCreated, dispatch, user]);
+  }, [profileCreated, dispatch, userId, role]);
 
   // Save handler
   const handleSave = (updatedData) => {

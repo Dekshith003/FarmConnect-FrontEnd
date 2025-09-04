@@ -1,12 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-export function Widget({ title, value, icon }) {
+export function Widget({ title, value, unit, price, icon }) {
   return (
     <div className="bg-white rounded-lg shadow p-6 text-center flex flex-col items-center">
-      <span className="text-3xl mb-2">{icon}</span>
+      <div className="widget-icon text-3xl mb-2">{icon}</div>
       <h2 className="text-lg font-semibold mb-1">{title}</h2>
-      <p className="text-2xl font-bold text-green-700">{value}</p>
+      <p className="text-2xl font-bold text-green-700">
+        {value} {unit}
+      </p>
+      {price && (
+        <p className="text-2xl font-bold text-green-700">Price: {price}</p>
+      )}
     </div>
   );
 }
@@ -50,28 +55,6 @@ export function AICropRecommendation({ name, desc, percent }) {
       <button className="ml-4 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold hover:bg-green-200">
         Learn More
       </button>
-    </div>
-  );
-}
-
-export function ActiveListing({ name, views, inquiries, status }) {
-  return (
-    <div className="flex items-center justify-between bg-[#f7faf7] rounded-lg px-4 py-2 mb-2">
-      <div>
-        <div className="font-semibold">{name}</div>
-        <div className="text-xs text-gray-600">
-          {views} views • {inquiries} inquiries
-        </div>
-      </div>
-      <span
-        className={`ml-4 px-3 py-1 rounded-full text-xs font-semibold ${
-          status === "active"
-            ? "bg-green-100 text-green-700"
-            : "bg-gray-200 text-gray-700"
-        }`}
-      >
-        {status}
-      </span>
     </div>
   );
 }

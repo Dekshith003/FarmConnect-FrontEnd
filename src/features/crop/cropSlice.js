@@ -4,6 +4,7 @@ import {
   createCrop,
   removeCrop,
   fetchFarmerCrops,
+  toggleSoldStatus,
 } from "./cropThunks";
 import { fetchTrendingCrops } from "./trendingThunks";
 
@@ -26,6 +27,17 @@ const cropSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(toggleSoldStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const updated = action.payload;
+        state.crops = state.crops.map((crop) =>
+          crop._id === updated._id ? updated : crop
+        );
+      })
+      .addCase(toggleSoldStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to toggle crop status";
+      })
       .addCase(fetchTrendingCrops.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -68,6 +80,7 @@ const cropSlice = createSlice({
           : Array.isArray(action.payload?.crops)
           ? action.payload.crops
           : [];
+        console.log("Farmer Crops &&&&&&&&&&&&&:", state.crops);
       })
       .addCase(fetchFarmerCrops.rejected, (state, action) => {
         state.loading = false;
@@ -86,6 +99,7 @@ const cropSlice = createSlice({
           state.crops.push(action.payload);
         }
         state.success = "Crop added successfully";
+        console.log("Crops added  &&&&&&&&&&&&&:", state.crops);
       })
       .addCase(createCrop.rejected, (state, action) => {
         state.loading = false;

@@ -7,8 +7,8 @@ export const registerAPI = (userData) =>
 export const loginAPI = (credentials) =>
   axiosInstance.post(apiEndpoints.auth.login.url, credentials);
 
-export const forgotPasswordAPI = (email) =>
-  axiosInstance.post(apiEndpoints.auth.forgotPassword.url, { email });
+export const forgotPasswordAPI = (email, role) =>
+  axiosInstance.post(apiEndpoints.auth.forgotPassword.url, { email, role });
 
 export const resetPasswordAPI = ({
   token,

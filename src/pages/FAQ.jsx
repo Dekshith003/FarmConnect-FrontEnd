@@ -35,12 +35,12 @@ const faqs = [
   {
     title: "How do I reset my password?",
     content:
-      "Click on 'Forgot Password' on the login screen and follow the instructions. You’ll receive a reset link via email.",
+      "Click on 'Forgot Password' on the login screen and follow the instructions. You'll receive a reset link via email.",
   },
   {
     title: "How do I delete my account?",
     content:
-      "Navigate to your profile settings and click on 'Delete Account'. You’ll be asked to confirm before permanent deletion.",
+      "Navigate to your profile settings and click on 'Delete Account'. You'll be asked to confirm before permanent deletion.",
   },
   {
     title: "Where can I find the terms and conditions?",

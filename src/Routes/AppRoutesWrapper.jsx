@@ -11,12 +11,12 @@ import NotFound from "../pages/not-found/NotFound";
 import Register from "../pages/auth/register";
 import Login from "../pages/auth/Login";
 import VerifyOtp from "../pages/auth/VerifyOtp";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 import { navigationLinks } from "../utils/Constants";
 import FarmMap from "../components/FarmMap";
 import PestDetection from "../pages/pest-detection/PestDetection";
 import CropRecommendations from "../pages/ai/CropRecommendations";
 import Predict from "../pages/ai/Predict";
-import Recommend from "../pages/ai/Recommend";
 import CropManagementPage from "../pages/crop/CropManagementPage";
 import CropForm from "../pages/crop/CropForm";
 import Profile from "../pages/profile/profile";
@@ -32,6 +32,7 @@ const publicRoutes = [
   { path: "/weather-dashboard", element: <WeatherDashboard /> },
   { path: navigationLinks.register.path, element: <Register /> },
   { path: navigationLinks.login.path, element: <Login /> },
+  { path: "/auth/forgot-password", element: <ForgotPassword /> },
   { path: "/verify-otp", element: <VerifyOtp /> },
   { path: "*", element: <NotFound /> },
 ];
@@ -69,14 +70,6 @@ const aiRoutes = [
       </ProtectedRoute>
     ),
   },
-  {
-    path: navigationLinks.aiRecommend.path,
-    element: (
-      <ProtectedRoute>
-        <Recommend />
-      </ProtectedRoute>
-    ),
-  },
 ];
 
 const protectedRoutes = [
@@ -91,7 +84,6 @@ const protectedRoutes = [
     element: <CropRecommendations />,
   },
   { path: navigationLinks.aiPredict.path, element: <Predict /> },
-  { path: navigationLinks.aiRecommend.path, element: <Recommend /> },
   {
     path: navigationLinks.profile.path,
     element: (

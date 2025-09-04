@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaCommentDots, FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { toggleSoldStatus } from "../features/crop/cropThunks";
 
 export default function CropCard({ crop, onClick }) {
+  const dispatch = useDispatch();
+
+  const [isSold, setIsSold] = useState(crop?.isSold || false);
+
+  useEffect(() => {
+    setIsSold(crop?.isSold || false);
+  }, [crop]);
+
   const navigate = useNavigate();
-  const [isSold, setIsSold] = React.useState(!!crop.isSold);
   // Debug log to inspect crop data
-  console.log("CropCard crop:", crop);
+  // console.log("CropCard crop:", crop);
 
   // Robust image handling
   let imageUrl = "";
@@ -132,16 +141,17 @@ export default function CropCard({ crop, onClick }) {
       {isSold && (
         <div className="mt-2 text-xs text-red-500 font-bold">SOLD</div>
       )}
+
       {/* Show Mark as Sold button only for farmers */}
       {(() => {
         let isFarmer = false;
         try {
-          const userData = localStorage.getItem("user");
-          if (userData) {
-            const user = JSON.parse(userData);
-            if (user && user.userDetails === "farmer") isFarmer = true;
+          const role = localStorage.getItem("role"); // role stored separately
+          if (role && role === "farmer") {
+            isFarmer = true;
           }
         } catch (e) {}
+
         if (isFarmer) {
           return (
             <button
@@ -150,9 +160,11 @@ export default function CropCard({ crop, onClick }) {
                   ? "bg-gray-300 text-gray-700"
                   : "bg-green-700 text-white hover:bg-green-800"
               }`}
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
-                setIsSold((prev) => !prev);
+                // Dispatch thunk to update DB and crop list
+                await dispatch(toggleSoldStatus(crop._id));
+                // UI will update via Redux state
               }}
             >
               {isSold ? "Unmark as Sold" : "Mark as Sold"}

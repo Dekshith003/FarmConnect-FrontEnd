@@ -1,18 +1,11 @@
-import { getFarmerCrops } from "./cropApi";
-// Fetch crops for a specific farmer
-export const fetchFarmerCrops = createAsyncThunk(
-  "crop/fetchFarmerCrops",
-  async (farmerId, { rejectWithValue }) => {
-    try {
-      const res = await getFarmerCrops(farmerId);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getCrops, addCrop, deleteCrop } from "./cropApi";
+import {
+  getCrops,
+  addCrop,
+  deleteCrop,
+  getFarmerCrops,
+  toggleSoldApi,
+} from "./cropApi";
 
 export const fetchCrops = createAsyncThunk(
   "crop/fetchCrops",
@@ -45,6 +38,31 @@ export const removeCrop = createAsyncThunk(
     try {
       await deleteCrop(id);
       return id;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// Fetch crops for a specific farmer
+export const fetchFarmerCrops = createAsyncThunk(
+  "crop/fetchFarmerCrops",
+  async (farmerId, { rejectWithValue }) => {
+    try {
+      const res = await getFarmerCrops(farmerId);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const toggleSoldStatus = createAsyncThunk(
+  "crop/toggleSoldStatus",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await toggleSoldApi(id);
+      return res.data.crop;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }

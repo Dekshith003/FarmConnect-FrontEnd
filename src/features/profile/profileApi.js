@@ -1,18 +1,33 @@
 import axiosInstance from "../../services/axiosInstance";
 
-// Get profile by userId
-export const getProfileById = (userId) =>
-  axiosInstance.get(`/profile/${userId}`);
+// Helper to get id and role from localStorage
+function getUserDetailsFromLocalStorage() {
+  const userDetails = JSON.parse(localStorage.getItem("user"))?.userDetails;
+  return {
+    id: userDetails?.id,
+    role: userDetails?.role || userDetails?.userrole || "Farmer",
+  };
+}
 
-// Fetch or create profile by userId (robust, recommended)
-export const fetchOrCreateProfile = (userId, profileData) =>
-  axiosInstance.post(`/profile/fetch-or-create/${userId}`, profileData);
+// Get profile by id and role
+export const getProfileById = () => {
+  const { id, role } = getUserDetailsFromLocalStorage();
+  console.log("Fetching profile for ID:", id, "with role:", role);
+  return axiosInstance.get(`/profile/${id}?role=${role}`);
+};
 
-export const updateProfileApi = (profileData) =>
-  axiosInstance.put(`/profile`, profileData);
+// Create profile by id and role
+export const createProfile = (profileData) => {
+  const { id, role } = getUserDetailsFromLocalStorage();
+  return axiosInstance.post(`/profile/${id}?role=${role}`, profileData);
+};
 
-// Get current user's profile
-export const getCurrentProfile = () => axiosInstance.get(`/profile`);
-
-// Delete current user's profile
-export const deleteProfile = () => axiosInstance.delete(`/profile`);
+export const updateProfileApi = (profileData) => {
+  const formData = new FormData();
+  Object.entries(profileData).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  return axiosInstance.put(`/profile`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};

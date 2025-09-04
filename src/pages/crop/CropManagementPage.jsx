@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchFarmerCrops } from "../../features/crop/cropThunks";
 import MyCropList from "./MyCropList";
+import CropForm from "./CropForm";
 
 export default function CropManagementPage() {
   const navigate = useNavigate();
@@ -53,13 +54,8 @@ export default function CropManagementPage() {
     };
   }, [cropsArray]);
 
-  // Handler to navigate to crop list after adding a crop
-  const handleCropAdded = () => {
-    if (farmerId) {
-      dispatch(fetchFarmerCrops(farmerId));
-    }
-    navigate("/crops");
-  };
+  // State to show/hide CropForm
+  const [showForm, setShowForm] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-[#fcfcf8]">
@@ -79,37 +75,73 @@ export default function CropManagementPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/di73dum6d/image/upload/v1756892730/wheat-removebg-preview_urmgx4.png"
+              alt="Total Crops"
+              style={{ width: 42, height: 42 }}
+              className="mb-2"
+            />
             <span className="text-xs text-gray-500 mb-1">Total Crops</span>
             <span className="text-2xl font-bold text-green-900">
               {summary.totalCrops}
             </span>
           </div>
           <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/di73dum6d/image/upload/v1756893128/land_fcfrz7.png"
+              alt="Farm Area"
+              style={{ width: 42, height: 42 }}
+              className="mb-2"
+            />
             <span className="text-xs text-gray-500 mb-1">Total Area</span>
             <span className="text-2xl font-bold text-green-900">
               {summary.totalArea}
             </span>
           </div>
           <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/di73dum6d/image/upload/v1756895572/soil-health_dcljxi.png"
+              alt="Average Health"
+              style={{ width: 42, height: 42 }}
+              className="mb-2"
+            />
             <span className="text-xs text-gray-500 mb-1">Average Health</span>
             <span className="text-2xl font-bold text-green-900">
               {summary.avgHealth}
             </span>
           </div>
           <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+            <img
+              src="https://res.cloudinary.com/di73dum6d/image/upload/v1756895678/sickle_hldx3x.png"
+              alt="Ready to Harvest"
+              style={{ width: 42, height: 42 }}
+              className="mb-2"
+            />
             <span className="text-xs text-gray-500 mb-1">Ready to Harvest</span>
             <span className="text-2xl font-bold text-green-900">
               {summary.readyToHarvest}
             </span>
           </div>
         </div>
-        {/* Add New Crop Button navigates to /crops/add */}
+        {/* Add New Crop Button toggles form */}
         <button
           className="mb-6 bg-green-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-800 transition flex items-center gap-2"
-          onClick={() => navigate("/crops/add")}
+          onClick={() => setShowForm((prev) => !prev)}
         >
           <span className="text-xl font-bold">+</span> Add New Crop
         </button>
+        {/* Show CropForm inline when showForm is true */}
+        {showForm && (
+          <div className="mb-8 bg-white rounded-xl shadow p-6">
+            <div className="mb-4 text-left">
+              <h2 className="text-2xl font-bold text-green-700 mb-2">
+                Add New Crop
+              </h2>
+              <p className="text-gray-600">Enter details for your new crop</p>
+            </div>
+            <CropForm />
+          </div>
+        )}
         <MyCropList />
       </div>
     </div>

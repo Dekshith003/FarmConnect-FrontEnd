@@ -3,8 +3,8 @@ export const navigationLinks = {
   about: { path: "/about" },
   contact: { path: "/contact" },
   faq: { path: "/faq" },
-  register: { path: "/register" },
-  login: { path: "/login" },
+  register: { path: "/auth/register" },
+  login: { path: "/auth/login" },
   profile: { path: "/profile" },
   marketplace: { path: "/marketplace" },
   cropManagement: { path: "/crops" },
@@ -13,7 +13,6 @@ export const navigationLinks = {
   map: { path: "/map" },
   aiCropRecommendations: { path: "/ai/recommend/crop" },
   aiPredict: { path: "/ai/predict" },
-  aiRecommend: { path: "/ai/recommend" },
 };
 
 export const apiEndpoints = {
@@ -28,6 +27,8 @@ export const apiEndpoints = {
   },
   profile: {
     getProfile: { method: "GET", url: "/profile" },
+    getProfileById: { method: "GET", url: "/profile/:userId" },
+    createProfile: { method: "POST", url: "/profile/:userId" },
     updateProfile: { method: "PUT", url: "/profile" },
   },
   crop: {
@@ -58,6 +59,5 @@ export const apiEndpoints = {
   ai: {
     cropRecommendations: { method: "POST", url: "/ai/recommend/crop" },
     predict: { method: "POST", url: "/ai/predict" },
-    // recommend endpoint removed
   },
 };

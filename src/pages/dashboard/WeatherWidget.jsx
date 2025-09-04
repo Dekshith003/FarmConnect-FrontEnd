@@ -46,7 +46,14 @@ export default function WeatherWidget() {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-4">
-      <h2 className="text-lg font-bold mb-4">Weather Forecast</h2>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-lg font-bold">Weather Forecast</h2>
+        <img
+          src="https://res.cloudinary.com/di73dum6d/image/upload/v1756893417/thunder_zjbuos.png"
+          alt="Weather Icon"
+          style={{ width: 32, height: 32 }}
+        />
+      </div>
       {loading && <div>Loading weather...</div>}
       {error && <div className="text-red-500">{error}</div>}
       {weather && weather.weather && weather.weather[0] && (

@@ -158,7 +158,7 @@ function AboutUs() {
 
             <div className="hover:scale-105 transition-transform duration-300">
               <img
-                src="https://res.cloudinary.com/di73dum6d/image/upload/v1754402312/save-money_swrzjg.png"
+                src="https://res.cloudinary.com/di73dum6d/image/upload_v1754402312/save-money_swrzjg.png"
                 alt="Transparent Pricing"
                 className="mx-auto w-20 h-20 mb-4"
                 loading="lazy"

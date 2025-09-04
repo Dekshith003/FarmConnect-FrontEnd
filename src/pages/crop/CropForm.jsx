@@ -129,9 +129,11 @@ export default function CropForm() {
   }, [crops]);
 
   return (
-    <div className="max-w-lg mx-auto py-8 px-4">
-      <h2 className="text-xl font-bold mb-4 text-green-700">Add Crop</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         <div>
           <label htmlFor="name" className="block font-medium mb-1">
             Crop Name
@@ -156,7 +158,7 @@ export default function CropForm() {
             value={form.category}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2 rounded bg-white"
+            className="w-full border px-3 py-2 rounded"
           >
             <option value="" disabled>
               Select category
@@ -215,7 +217,7 @@ export default function CropForm() {
             name="unit"
             value={form.unit}
             onChange={handleChange}
-            className="w-full border px-3 py-2 rounded bg-white"
+            className="w-full border px-3 py-2 rounded"
           >
             <option value="kg">kg</option>
             <option value="g">g</option>
@@ -265,7 +267,7 @@ export default function CropForm() {
             required
           />
         </div>
-        <div>
+        <div className="md:col-span-2">
           <label htmlFor="images" className="block font-medium mb-1">
             Images
           </label>
@@ -289,12 +291,14 @@ export default function CropForm() {
             ))}
           </div>
         </div>
-        <button
-          type="submit"
-          className="bg-green-700 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-800 transition"
-        >
-          Add Crop
-        </button>
+        <div className="md:col-span-2 flex gap-4">
+          <button
+            type="submit"
+            className="bg-green-700 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-800 transition w-full"
+          >
+            Add Crop
+          </button>
+        </div>
       </form>
       {loading && <p>Loading...</p>}
       {error &&

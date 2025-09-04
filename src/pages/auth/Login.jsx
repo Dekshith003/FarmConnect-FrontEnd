@@ -137,7 +137,7 @@ export default function Login() {
         <p className="mt-8 text-md text-gray-600">
           Don't have an account?{" "}
           <Link
-            to="/register"
+            to="/auth/register"
             className="text-green-700 hover:underline font-semibold"
           >
             Sign up here
@@ -258,12 +258,9 @@ export default function Login() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="accent-green-700" /> Remember me
-            </label>
-            <a href="#" className="text-green-700 hover:underline">
+            <Link to="/auth/forgot-password" className="text-green-700 hover:underline">
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           <button
@@ -281,7 +278,7 @@ export default function Login() {
           <p className="text-center text-gray-600 mt-2">
             Don't have an account?{" "}
             <Link
-              to="/register"
+              to="/auth/register"
               className="text-green-700 hover:underline font-semibold"
             >
               Sign up

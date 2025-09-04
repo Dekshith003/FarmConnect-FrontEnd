@@ -32,6 +32,7 @@ export const fetchPestHistory = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await getPestHistory();
+      console.log("Pest History Response:", res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

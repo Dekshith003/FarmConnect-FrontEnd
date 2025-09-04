@@ -9,7 +9,6 @@ import { fetchCrops } from "../../features/crop/cropThunks";
 // Reuse UI components from DashboardWidgets
 import {
   Widget,
-  ActiveListing,
   QuickAction,
   RecentActivityItem,
   FarmAlert,
@@ -47,7 +46,6 @@ export default function FarmerDashboard({ stats, loading, error }) {
   const [cropRecommendationText, setCropRecommendationText] = useState("");
 
   console.log("Crop Recommendation Text:", cropRecommendationText);
-  console.log("data", cropRecommendations.data.recommendations);
 
   useEffect(() => {
     dispatch(fetchCrops());
@@ -58,33 +56,70 @@ export default function FarmerDashboard({ stats, loading, error }) {
     {
       title: "Total Crops",
       value: stats?.totalCrops ?? cropsArray.length,
-      icon: "🌱",
+      icon: (
+        <img
+          src="https://res.cloudinary.com/di73dum6d/image/upload/v1756892730/wheat-removebg-preview_urmgx4.png"
+          alt="Total Crops"
+          style={{ width: 32, height: 32 }}
+        />
+      ),
     },
     {
-      title: "Active Listings",
+      title: "Crops Sold",
       value:
-        stats?.activeListings ??
-        cropsArray.filter((c) => c.status === "active").length,
-      icon: "📦",
+        stats?.soldCrops ??
+        cropsArray.filter((c) => c.status === "sold").length,
+      icon: (
+        <img
+          src="https://res.cloudinary.com/di73dum6d/image/upload/v1756892822/vegetables_ib5ele.png"
+          alt="Crops Sold"
+          style={{ width: 32, height: 32 }}
+        />
+      ),
     },
     {
-      title: "Total Sales",
-      value: stats?.totalSales ?? 0,
-      icon: "💰",
+      title: "Crops Not Sold",
+      value:
+        (stats?.totalCrops ?? cropsArray.length) -
+        (stats?.soldCrops ??
+          cropsArray.filter((c) => c.status === "sold").length),
+      icon: (
+        <img
+          src="https://res.cloudinary.com/di73dum6d/image/upload/v1756892979/wheat_1_lujkyz.png"
+          alt="Crops Not Sold"
+          style={{ width: 32, height: 32 }}
+        />
+      ),
     },
     {
       title: "Farm Area (acres)",
       value: stats?.farmArea ?? "-",
-      icon: "🏞️",
+      icon: (
+        <img
+          src="https://res.cloudinary.com/di73dum6d/image/upload/v1756893128/land_fcfrz7.png"
+          alt="Farm Area"
+          style={{ width: 32, height: 32 }}
+        />
+      ),
     },
   ];
+  console.log("Stats:", stats);
 
   // Example recent activity (replace with real data)
-  const recentActivity = [
-    { text: "Added new crop: Wheat", time: "2h ago", color: "green" },
-    { text: "Updated farm boundary", time: "1d ago", color: "blue" },
-    { text: "Received inquiry for Rice", time: "3d ago", color: "orange" },
-  ];
+  // Show recent crops from stats.recentCrops if available
+  const recentActivity = Array.isArray(stats?.recentCrops)
+    ? stats.recentCrops.map((crop) => ({
+        text: `Added new crop: ${crop.name}`,
+        time: crop.createdAt
+          ? new Date(crop.createdAt).toLocaleDateString()
+          : "recent",
+        color: "green",
+      }))
+    : [
+        { text: "Added new crop: Wheat", time: "2h ago", color: "green" },
+        { text: "Updated farm boundary", time: "1d ago", color: "blue" },
+        { text: "Received inquiry for Rice", time: "3d ago", color: "orange" },
+      ];
 
   // Example farm alerts (replace with real data)
   const farmAlerts = [
@@ -106,9 +141,6 @@ export default function FarmerDashboard({ stats, loading, error }) {
     { label: "Profile Settings", to: "/profile" },
     { label: "Crop Management", to: "/crops" },
   ];
-
-  // Active listings (from crops with status 'active')
-  const activeListings = cropsArray.filter((c) => c.status === "active");
 
   return (
     <div className="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -153,24 +185,22 @@ export default function FarmerDashboard({ stats, loading, error }) {
             )}
           </div>
         )}
-        {/* Active Listings */}
-        <div className="bg-white rounded-lg shadow p-6 mb-4">
-          <h2 className="text-lg font-bold mb-4">Your Active Listings</h2>
-          {activeListings.length > 0 ? (
-            activeListings
-              .slice(0, 3)
-              .map((listing, i) => (
-                <ActiveListing
-                  key={i}
-                  name={listing.name || listing.cropName}
-                  views={listing.views || 0}
-                  inquiries={listing.inquiries || 0}
-                  status={listing.status}
-                />
-              ))
-          ) : (
-            <div className="text-gray-500">No active listings.</div>
-          )}
+
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold mb-4">Crops</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {Array.isArray(stats?.recentCrops)
+              ? stats.recentCrops.map((crop, i) => (
+                  <Widget
+                    key={i}
+                    title={crop.name}
+                    value={`${crop.quantity}`}
+                    unit={crop.unit ? `${crop.unit}` : undefined}
+                    price={crop.price ? `${crop.price}` : undefined}
+                  />
+                ))
+              : null}
+          </div>
         </div>
       </div>
       <div className="space-y-6">

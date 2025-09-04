@@ -43,7 +43,7 @@ export default function Register() {
   // Navigate to login after successful OTP verification
   useEffect(() => {
     if (otpVerified) {
-      navigate("/login");
+      navigate("/auth/login");
     }
   }, [otpVerified, navigate]);
 
@@ -406,7 +406,7 @@ export default function Register() {
         <p className="mt-8 text-md text-gray-600">
           Already have an account?{" "}
           <Link
-            to="/login"
+            to="/auth/login"
             className="text-green-700 hover:underline font-semibold"
           >
             Sign in here
@@ -780,7 +780,7 @@ export default function Register() {
             <p className="text-center text-gray-600 mt-2">
               Already have an account?{" "}
               <Link
-                to="/login"
+                to="/auth/login"
                 className="text-green-700 hover:underline font-semibold"
               >
                 Sign in

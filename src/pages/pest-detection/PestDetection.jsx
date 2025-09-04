@@ -301,9 +301,14 @@ export default function PestDetection() {
             </div>
           )}
           {history.map((item, idx) => {
-            let imageSrc = item.imageUrl
-              ? `http://localhost:5001${item.imageUrl}`
-              : null;
+            let detected = item.detectedIssue || {};
+            let imageSrc = null;
+            if (item?.imageUrl) {
+              imageSrc = `http://localhost:5001${item.imageUrl}`;
+            } else if (detected?.imageUrl) {
+              imageSrc = `http://localhost:5001${detected.imageUrl}`;
+            }
+            console.log("History Item:", item);
             return (
               <div
                 key={idx}
@@ -312,10 +317,14 @@ export default function PestDetection() {
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <span className="font-bold text-lg text-gray-800">
-                      {item.pestName || item.pest_name || "Unknown Pest"}
+                      {item.pestName || detected.pestName || "Unknown Pest"}
                     </span>
                     <span className="block text-gray-500 text-xs mt-1">
-                      {item.cropLocation || item.cropName || "Location Unknown"}
+                      {item.cropLocation ||
+                        item.cropName ||
+                        detected.description ||
+                        item.description ||
+                        "Location/Description Unknown"}
                     </span>
                   </div>
                   <span
@@ -334,7 +343,7 @@ export default function PestDetection() {
                   {imageSrc ? (
                     <img
                       src={imageSrc}
-                      alt="Detected Pest"
+                      alt="Pest Detection"
                       className="h-36 object-contain"
                     />
                   ) : (
@@ -346,11 +355,18 @@ export default function PestDetection() {
                     </span>
                   )}
                 </div>
+                {/* Detected Issue Details */}
+                {item.detectedIssue && (
+                  <div className="mb-2">
+                    <span className="font-medium">Detected Issue Details</span>
+                  </div>
+                )}
                 <div className="mb-2">
                   <span className="font-medium">Labels:</span>{" "}
-                  {Array.isArray(item.labels) && item.labels.length > 0 ? (
+                  {Array.isArray(detected.labels) &&
+                  detected.labels.length > 0 ? (
                     <ul className="list-disc pl-5 text-green-700 text-xs">
-                      {item.labels.map((label, i) => (
+                      {detected.labels.map((label, i) => (
                         <li key={i}>
                           {label.description}{" "}
                           {typeof label.score === "number" &&
@@ -377,10 +393,10 @@ export default function PestDetection() {
                 </div>
                 <div className="mb-2">
                   <span className="font-medium">Web Entities:</span>{" "}
-                  {Array.isArray(item.webEntities) &&
-                  item.webEntities.length > 0 ? (
+                  {Array.isArray(detected.webEntities) &&
+                  detected.webEntities.length > 0 ? (
                     <ul className="list-disc pl-5 text-green-700 text-xs">
-                      {item.webEntities.map((entity, i) => (
+                      {detected.webEntities.map((entity, i) => (
                         <li key={i}>
                           {entity.description || "Entity"}{" "}
                           {typeof entity.score === "number" &&
@@ -392,36 +408,17 @@ export default function PestDetection() {
                     <span className="ml-2 text-gray-500">None</span>
                   )}
                 </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600 text-xs">
-                    Confidence:{" "}
-                    <span className="font-bold">
-                      {item.confidence ? `${item.confidence}%` : "N/A"}
-                    </span>
-                  </span>
-                  <span className="text-gray-600 text-xs">
-                    Detected:{" "}
-                    <span className="font-bold">
-                      {item.detectedAt
-                        ? new Date(item.detectedAt).toLocaleString()
-                        : "Unknown"}
-                    </span>
-                  </span>
-                </div>
                 <div className="mb-2">
-                  <span className="font-semibold text-gray-700 text-sm block mb-1">
-                    Treatment Recommendations:
-                  </span>{" "}
-                  {item.suggestions && item.suggestions.length > 0 ? (
+                  <span className="font-medium">Recommendations:</span>{" "}
+                  {Array.isArray(item.recommendations) &&
+                  item.recommendations.length > 0 ? (
                     <ul className="list-disc pl-5 text-green-700 text-xs">
-                      {item.suggestions.map((s, i) => (
-                        <li key={i}>{s}</li>
+                      {item.recommendations.map((rec, i) => (
+                        <li key={i}>{rec}</li>
                       ))}
                     </ul>
                   ) : (
-                    <span className="text-gray-400 text-xs">
-                      No recommendations available.
-                    </span>
+                    <span className="ml-2 text-gray-500">None</span>
                   )}
                 </div>
                 <div className="flex gap-2 mt-2">

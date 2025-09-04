@@ -73,7 +73,6 @@ const authSlice = createSlice({
         state.isLoading.login = false;
         if (action.payload.userDetails) {
           const rawUser = action.payload.userDetails.user || {};
-          console.log(rawUser);
           const normalizedUser = {
             ...rawUser,
             _id: rawUser.id || rawUser._id || null,

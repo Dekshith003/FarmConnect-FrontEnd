@@ -9,7 +9,6 @@ import {
   FaChartLine,
   FaCloudSun,
   FaMapMarkerAlt,
-  FaCommentDots,
   FaSearch,
   FaBell,
   FaLeaf,
@@ -18,41 +17,43 @@ import {
 import { Leaf } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../features/auth/authSlice";
-import ProfileAvatar from "./ProfileAvatar";
+// import ProfileAvatar from "./ProfileAvatar";
 
-function ProfileIcon({ profile, user }) {
-  const navigate = useNavigate();
-  if (profile?.avatar) {
-    return (
-      <img
-        src={profile.avatar}
-        alt="Avatar"
-        className="w-8 h-8 rounded-full object-cover border-2 border-green-600 cursor-pointer"
-        loading="lazy"
-        onClick={() => navigate("/profile")}
-      />
-    );
-  }
-  if (profile?.firstName || user?.firstName) {
-    return (
-      <div
-        className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-bold cursor-pointer"
-        onClick={() => navigate("/profile")}
-      >
-        {profile?.firstName?.charAt(0) || user?.firstName?.charAt(0) || "U"}
-      </div>
-    );
-  }
-  // fallback to icon for logged-out
-  return <FaUser className="text-gray-600 text-xl" />;
-}
+// function ProfileIcon({ profile, user }) {
+//   const navigate = useNavigate();
+//   if (profile?.avatar) {
+//     return (
+//       <img
+//         src={profile.avatar}
+//         alt="Avatar"
+//         className="w-8 h-8 rounded-full object-cover border-2 border-green-600 cursor-pointer"
+//         loading="lazy"
+//         onClick={() => navigate("/profile")}
+//       />
+//     );
+//   }
+//   if (profile?.firstName || user?.firstName) {
+//     return (
+//       <div
+//         className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-lg font-bold cursor-pointer"
+//         onClick={() => navigate("/profile")}
+//       >
+//         {profile?.firstName?.charAt(0) || user?.firstName?.charAt(0) || "U"}
+//       </div>
+//     );
+//   }
+//   // fallback to icon for logged-out
+//   return <FaUser className="text-gray-600 text-xl" />;
+// }
 
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { profile } = useSelector((state) => state.profile);
+  // const { profile } = useSelector((state) => state.profile);
   let user = useSelector((state) => state.auth.user);
   let userRole = user?.role || user?.userrole;
 
@@ -80,8 +81,24 @@ export default function NavBar() {
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    navigate("/login");
+    navigate("/auth/login");
     setMenuOpen(false);
+  };
+
+  const handleSearchClick = () => {
+    setShowSearchBar((prev) => !prev);
+  };
+
+  const handleSearchInput = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // Implement crop search logic here (e.g., navigate to crop search results page or filter crops)
+    navigate(`/crops?search=${encodeURIComponent(searchQuery)}`);
+    setShowSearchBar(false);
+    setSearchQuery("");
   };
 
   return (
@@ -234,35 +251,51 @@ export default function NavBar() {
               </Link>
             </>
           )}
-          {/* Search, Notification, Profile */}
-          <button
-            className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
-            title="Search"
-          >
-            <FaSearch />
-          </button>
-          <button
-            className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
-            title="Notifications"
-          >
-            <FaBell />
-          </button>
-          {user ? (
-            <Link
-              to={"/profile"}
-              className="ml-2 flex items-center"
-              title={profile?.firstName || user?.firstName || "Profile"}
-            >
-              <ProfileAvatar profile={profile} size={32} />
-            </Link>
-          ) : (
-            <Link
-              to={"/profile"}
-              className="ml-2 flex flex-row items-center gap-2"
-            >
-              <FaUser className="text-gray-600 text-xl" />
-              <span className="font-medium text-gray-700">Profile</span>
-            </Link>
+          {/* Search, Notification, Profile: only show when user is logged in */}
+          {user && (
+            <>
+              <button
+                className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+                title="Search"
+                onClick={handleSearchClick}
+              >
+                <FaSearch />
+              </button>
+              {showSearchBar && (
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className="flex items-center ml-2"
+                >
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearchInput}
+                    placeholder="Search crops..."
+                    className="border px-3 py-1 rounded-full text-sm"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="ml-2 px-3 py-1 bg-green-600 text-white rounded-full text-sm"
+                  >
+                    Go
+                  </button>
+                </form>
+              )}
+              {/* <button
+                className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+                title="Notifications"
+              >
+                <FaBell />
+              </button> */}
+              {/* <Link
+                to={"/profile"}
+                className="ml-2 flex items-center"
+                title={profile?.firstName || user?.firstName || "Profile"}
+              >
+                <ProfileAvatar profile={profile} size={32} />
+              </Link> */}
+            </>
           )}
           {user ? (
             <button
@@ -274,13 +307,13 @@ export default function NavBar() {
           ) : (
             <>
               <Link
-                to="/login"
+                to="/auth/login"
                 className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition text-sm"
               >
                 <FaUser className="text-gray-600" /> Login
               </Link>
               <Link
-                to="/register"
+                to="/auth/register"
                 className="bg-green-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-green-800 transition text-sm"
               >
                 Get Started
@@ -383,26 +416,30 @@ export default function NavBar() {
                 </Link>
               </>
             )}
-            {/* Search, Notification, Profile */}
-            <button
-              className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
-              title="Search"
-            >
-              <FaSearch />
-            </button>
-            <button
-              className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
-              title="Notifications"
-            >
-              <FaBell />
-            </button>
-            <Link
-              to={"/profile"}
-              className="ml-2 flex flex-row items-center gap-2"
-            >
-              <ProfileIcon profile={profile} user={user} />
-              <span className="font-medium text-gray-700">Profile</span>
-            </Link>
+            {/* Search, Notification, Profile: only show when user is logged in */}
+            {user && (
+              <>
+                <button
+                  className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+                  title="Search"
+                >
+                  <FaSearch />
+                </button>
+                {/* <button
+                  className="p-2 rounded-full hover:bg-gray-100 transition text-xl text-gray-700 mr-1"
+                  title="Notifications"
+                >
+                  <FaBell />
+                </button> */}
+                {/* <Link
+                  to={"/profile"}
+                  className="ml-2 flex flex-row items-center gap-2"
+                >
+                  <ProfileIcon profile={profile} user={user} />
+                  <span className="font-medium text-gray-700">Profile</span>
+                </Link> */}
+              </>
+            )}
             {user ? (
               <button
                 onClick={handleLogout}
@@ -413,13 +450,13 @@ export default function NavBar() {
             ) : (
               <>
                 <Link
-                  to="/login"
+                  to="/auth/login"
                   className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-full hover:bg-gray-100 transition text-sm"
                 >
                   <FaUser className="text-gray-600" /> Login
                 </Link>
                 <Link
-                  to="/register"
+                  to="/auth/register"
                   className="bg-green-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-green-800 transition text-sm"
                 >
                   Get Started

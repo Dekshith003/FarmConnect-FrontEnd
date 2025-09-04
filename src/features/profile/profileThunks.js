@@ -1,18 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  getCurrentProfile,
-  getProfileById,
-  updateProfileApi,
-} from "./profileApi";
+import { getProfileById, updateProfileApi, createProfile } from "./profileApi";
 
 export const fetchProfile = createAsyncThunk(
   "profile/fetchProfile",
-  async (userId, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      // If userId is provided, fetch by id, else fetch current
-      const res = userId
-        ? await getProfileById(userId)
-        : await getCurrentProfile();
+      const res = await getProfileById();
+      console.log(res.data);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -25,6 +19,18 @@ export const updateProfile = createAsyncThunk(
   async (profileData, { rejectWithValue }) => {
     try {
       const res = await updateProfileApi(profileData);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+export const createProfileThunk = createAsyncThunk(
+  "profile/createProfile",
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const res = await createProfile(profileData);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

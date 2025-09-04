@@ -38,10 +38,15 @@ export default function MarketplacePage() {
     const matchesSearch =
       !search ||
       crop.name?.toLowerCase().includes(search.toLowerCase()) ||
-      (typeof crop.farmer === "object" &&
-        crop.farmer?.name?.toLowerCase().includes(search.toLowerCase())) ||
-      (typeof crop.farmer === "object" &&
-        crop.farmer?.location?.toLowerCase().includes(search.toLowerCase())) ||
+      (crop.farmer &&
+        typeof crop.farmer === "object" &&
+        `${crop.farmer.firstName || ""} ${crop.farmer.lastName || ""}`
+          .toLowerCase()
+          .includes(search.toLowerCase())) ||
+      (crop.farmer &&
+        typeof crop.farmer === "object" &&
+        crop.farmer.location &&
+        crop.farmer.location.toLowerCase().includes(search.toLowerCase())) ||
       (typeof crop.location === "string" &&
         crop.location.toLowerCase().includes(search.toLowerCase()));
     const matchesCategory = !cropCategory || crop.category === cropCategory;
@@ -149,7 +154,7 @@ export default function MarketplacePage() {
           <div className="flex justify-center mt-8">
             <button
               className="bg-white border border-gray-300 text-gray-900 px-6 py-2 rounded-xl font-semibold shadow hover:bg-gray-100 transition"
-              onClick={() => setShowCount(showCount + 3)}
+              onClick={() => setShowCount(showCount + 6)}
             >
               Load More Crops
             </button>

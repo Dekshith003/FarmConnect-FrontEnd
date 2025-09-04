@@ -3,6 +3,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { Link } from "react-router-dom";
 import heroFarm from "../assets/heroFarm.jpg";
+import ImageSlider from "../pages/ImageSlider";
 
 function Index() {
   useEffect(() => {
@@ -88,7 +89,6 @@ function Index() {
           </div>
         </div>
       </section>
-
       {/* Features Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
@@ -134,6 +134,7 @@ function Index() {
       {/* Proven Results */}
       <section className="bg-[#f5f3ec] py-20">
         <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-10">
+          {/* Left Content */}
           <div className="w-full lg:w-1/2" data-aos="fade-right">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Proven Results for Modern Farmers
@@ -142,6 +143,8 @@ function Index() {
               Join thousands of farmers who have already transformed their
               agricultural business with FarmConnect's innovative platform.
             </p>
+
+            {/* Checklist with staggered AOS */}
             <ul className="space-y-3 text-gray-800">
               {[
                 "Increase farm profits by 30% on average",
@@ -151,10 +154,15 @@ function Index() {
                 "AI-powered crop recommendations",
                 "24/7 customer support",
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3">
+                <li
+                  key={i}
+                  className="flex items-center gap-3"
+                  data-aos="fade-up"
+                  data-aos-delay={i * 100} // stagger effect
+                >
                   <img
                     src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
-                    alt="check"
+                    alt="checkmark"
                     className="w-5 h-5"
                     loading="lazy"
                   />
@@ -162,28 +170,39 @@ function Index() {
                 </li>
               ))}
             </ul>
+
+            {/* CTA Button */}
             <Link
               to="/marketplace"
-              className="mt-6 inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-medium"
+              className="mt-6 inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-medium shadow-md transition-transform transform hover:scale-105"
+              data-aos="fade-up"
+              data-aos-delay="700"
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/512/3523/3523063.png"
                 className="w-5 h-5"
-                alt="market"
+                alt="marketplace"
                 loading="lazy"
               />
               Explore Marketplace
             </Link>
           </div>
 
+          {/* Right Content */}
           <div className="w-full lg:w-1/2 relative" data-aos="fade-left">
             <img
               src="https://preview--crop-circle-link.lovable.app/assets/marketplace-crops-G-Hv1mjB.jpg"
               alt="Fresh produce"
-              className="rounded-xl shadow-lg"
+              className="rounded-xl shadow-lg transition-transform duration-500 hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute bottom-4 right-4 bg-white shadow-md rounded-lg p-4 flex items-center gap-3">
+
+            {/* Floating Stats Card */}
+            <div
+              className="absolute bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 flex items-center gap-3 transition-transform transform hover:scale-105"
+              data-aos="zoom-in"
+              data-aos-delay="400"
+            >
               <img
                 src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png"
                 className="w-6 h-6"
@@ -199,16 +218,73 @@ function Index() {
         </div>
       </section>
 
+      {/* Card Section */}
       <section className="bg-[#f5f3ec] py-20">
         <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-10">
+          {/* Left Image */}
           <div className="w-full lg:w-1/2" data-aos="fade-right">
             <img
               src="https://res.cloudinary.com/di73dum6d/image/upload/v1755849141/MAphoto_wrtbb0.jpg"
               alt="Modern Farming"
-              className="rounded-xl shadow-lg"
+              className="rounded-xl shadow-lg transition-transform duration-500 hover:scale-105"
               loading="lazy"
             />
           </div>
+
+          {/* Right Text */}
+          <div className="w-full lg:w-1/2" data-aos="fade-left">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Empowering Farmers with Technology
+            </h2>
+            <p className="text-gray-700 mb-6">
+              FarmConnect bridges the gap between traditional agriculture and
+              modern technology, ensuring farmers can increase productivity,
+              reduce risks, and connect directly with buyers for better profits.
+            </p>
+
+            {/* Key Points with staggered animations */}
+            <ul className="space-y-3 text-gray-800">
+              {[
+                "Smart tools for efficient farming",
+                "Direct market access without middlemen",
+                "Real-time insights for weather & pricing",
+              ].map((item, i) => (
+                <li
+                  key={i}
+                  className="flex items-center gap-3"
+                  data-aos="fade-up"
+                  data-aos-delay={i * 100}
+                >
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/845/845646.png"
+                    alt="checkmark"
+                    className="w-5 h-5"
+                    loading="lazy"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <Link
+              to="/about"
+              className="mt-6 inline-flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-medium shadow-md transition-transform transform hover:scale-105"
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/2983/2983782.png"
+                className="w-5 h-5"
+                alt="about"
+                loading="lazy"
+              />
+              Learn More
+            </Link>
+          </div>
+        </div>
+        <div>
+          <ImageSlider />
         </div>
       </section>
 
@@ -279,7 +355,6 @@ function Index() {
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="bg-gradient-to-br from-green-800 to-green-600 py-20 text-center text-white">
         <div className="container mx-auto px-4" data-aos="fade-up">
